@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import toast from 'react-hot-toast';
 
-// CONFIGURATION: Direct link to Backend to bypass Nginx proxy issues
+// CONFIGURATION: Direct link to Backend for Images/Audio
 const BACKEND_URL = "https://dc-music-player-backend.onrender.com";
 
 const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick }) => {
@@ -49,7 +49,11 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
             res = await api.get('/songs', { headers: { 'Authorization': token } });
             setSongs(res.data || []);
         }
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+        console.error(err);
+        // DEBUG NOTIFICATION: This will tell you if the connection failed
+        toast.error("Failed to load songs. Check Console for details.");
+    }
   };
 
   const fetchUserPlaylists = async () => {
@@ -228,6 +232,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
                 {/* Click to Play */}
                 <div onClick={() => onPlay(song, filteredSongs)}>
                     <div style={{ width: '100%', aspectRatio: '1/1', borderRadius: '8px', marginBottom: '12px', position: 'relative', overflow: 'hidden', background: '#1e293b' }}>
+                        {/* Direct Backend Link for Image */}
                         <img 
                             src={`${BACKEND_URL}/songs/${song._id}/cover`} 
                             alt={song.title} 
