@@ -11,20 +11,16 @@ const Song = require('./models/Song');
 const Playlist = require('./models/Playlist');
 require('dotenv').config();
 
-
-
 const app = express();
 
-// ALLOW FRONTEND TO ACCESS AUDIO/IMAGES
+// ALLOW CORS FOR FRONTEND
 app.use(cors({
-    origin: '*', // Allow all origins (Simplest for deployment)
+    origin: '*',
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
-
-
 
 // --- CONFIG ---
 const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/musicplayer";
@@ -90,7 +86,7 @@ app.post('/login', async (req, res) => {
     } catch (err) { res.status(500).json({ err: 'Server error' }); }
 });
 
-// --- OTP / FORGOT PASSWORD ---
+// --- PASSWORD RESET (OTP) ---
 app.post('/forgot-password', async (req, res) => {
     const { username } = req.body;
     const user = await User.findOne({ username });
@@ -101,7 +97,7 @@ app.post('/forgot-password', async (req, res) => {
     user.otpExpires = Date.now() + 300000; // 5 mins
     await user.save();
 
-    console.log(`[OTP SYSTEM] Code for ${username}: ${otp}`); // Log to console
+    console.log(`[OTP SYSTEM] Code for ${username}: ${otp}`);
     res.json({ msg: 'OTP sent to backend console' });
 });
 
@@ -122,9 +118,24 @@ app.post('/reset-password', async (req, res) => {
     res.json({ msg: 'Password reset successful' });
 });
 
+// --- USER MANAGEMENT (ADMIN) ---
+app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const users = await User.find({}, '-password'); 
+        res.json(users);
+    } catch (err) { res.status(500).json({ err: 'Fetch failed' }); }
+});
+
+app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'User deleted' });
+    } catch (err) { res.status(500).json({ err: 'Delete failed' }); }
+});
+
 // --- SONG MANAGEMENT ---
 
-// 1. UPLOAD (With Auto-Metadata & FIX for Image Buffer)
+// 1. UPLOAD (Fail-Safe with Metadata)
 app.post('/upload', verifyToken, verifyAdmin, upload.single('file'), async (req, res) => {
     if (!req.file) return res.status(400).json({ err: 'No file' });
     
@@ -146,7 +157,7 @@ app.post('/upload', verifyToken, verifyAdmin, upload.single('file'), async (req,
         let pictureType = null;
 
         try {
-            // Use require because we pinned music-metadata 7.14.0 in Dockerfile
+            // Using version 7.14.0 as pinned in Dockerfile
             const { parseBuffer } = require('music-metadata');
             const metadata = await parseBuffer(req.file.buffer, req.file.mimetype);
             
@@ -156,7 +167,7 @@ app.post('/upload', verifyToken, verifyAdmin, upload.single('file'), async (req,
             if (metadata.format.duration) duration = metadata.format.duration;
             
             if (metadata.common.picture && metadata.common.picture.length > 0) {
-                // CRITICAL FIX: Convert Uint8Array to Node Buffer for Mongoose
+                // Convert Uint8Array to Buffer for Mongoose
                 picture = Buffer.from(metadata.common.picture[0].data);
                 pictureType = metadata.common.picture[0].format;
             }
@@ -178,7 +189,6 @@ app.post('/upload', verifyToken, verifyAdmin, upload.single('file'), async (req,
                     pictureType,
                     uploadedBy: req.userId
                 });
-                // Send back data WITHOUT the image to be fast
                 const { picture: _, ...songData } = newSong._doc;
                 res.status(201).json(songData);
             } catch (dbErr) {
@@ -257,17 +267,14 @@ app.post('/playlists', verifyToken, async (req, res) => {
     } catch (e) { res.status(500).json({err: 'Error creating playlist'}); }
 });
 
-// GET USER PLAYLISTS (Populated but Optimized)
 app.get('/playlists/user', verifyToken, async (req, res) => {
     try {
-        // Populate songs to allow cover art grid, but exclude heavy picture data
         const playlists = await Playlist.find({ createdBy: req.userId })
             .populate('songs', '-picture'); 
         res.json(playlists);
     } catch (e) { res.status(500).json({err: 'Error'}); }
 });
 
-// GET PUBLIC PLAYLISTS (Populated but Optimized)
 app.get('/playlists/public', verifyToken, async (req, res) => {
     try {
         const playlists = await Playlist.find({ isPublic: true })
@@ -276,7 +283,7 @@ app.get('/playlists/public', verifyToken, async (req, res) => {
     } catch (e) { res.status(500).json({err: 'Error'}); }
 });
 
-// DELETE PLAYLIST (Admin Only)
+// DELETE PLAYLIST
 app.delete('/playlists/:id', verifyToken, verifyAdmin, async (req, res) => {
     try {
         await Playlist.findByIdAndDelete(req.params.id);
