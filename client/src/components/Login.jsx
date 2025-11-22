@@ -37,7 +37,19 @@ const Login = ({ onLogin }) => {
 
   return (
     <div className="login-bg" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100vw', position: 'fixed', top: 0, left: 0, zIndex: 1000 }}>
-      <div className="fade-in" style={{ background: 'rgba(30, 41, 59, 0.8)', padding: '40px', borderRadius: '24px', width: '360px', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+      
+      {/* FIX: Added position relative & zIndex to force it above background */}
+      <div className="fade-in" style={{ 
+          position: 'relative', 
+          zIndex: 10, 
+          background: 'rgba(30, 41, 59, 0.8)', 
+          padding: '40px', 
+          borderRadius: '24px', 
+          width: '360px', 
+          backdropFilter: 'blur(20px)', 
+          border: '1px solid rgba(255,255,255,0.1)', 
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' 
+      }}>
         
         <h1 style={{ textAlign: 'center', fontSize: '28px', fontWeight: '800', marginBottom: '8px', color: 'white' }}>
           DC Music & Co.
