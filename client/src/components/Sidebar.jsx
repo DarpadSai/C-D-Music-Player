@@ -17,26 +17,38 @@ const Sidebar = ({ role, setView, currentView, onSearch, onPlaylistClick }) => {
   };
 
   const createPlaylist = async () => {
-      const name = prompt("Enter Neural Playlist ID:");
+      const name = prompt("Enter Playlist Frequency ID:");
       if (!name) return;
       try {
           const token = localStorage.getItem('token') || sessionStorage.getItem('token');
           await api.post('/playlists', { name }, { headers: { 'Authorization': token } });
           fetchPlaylists(); 
-      } catch (err) { toast.error("Creation Error"); }
+      } catch (err) { toast.error("Creation Failed"); }
+  };
+
+  const handleAvatarUpload = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+          const token = localStorage.getItem('token');
+          await api.post('/users/avatar', formData, { headers: { 'Authorization': token } });
+          toast.success("Avatar Uploaded");
+      } catch (err) { toast.error("Upload Failed"); }
   };
 
   const getStyle = (viewName) => `sidebar-btn ${currentView === viewName ? 'active' : ''}`;
 
   return (
-    <div style={{ background: '#050505', padding: '20px', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box', borderRight: '1px solid rgba(0, 243, 255, 0.1)' }}>
+    <div style={{ background: '#050505', padding: '20px', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box', borderRight: '1px solid rgba(0, 243, 255, 0.1)', paddingBottom: '120px' }}>
       
-      <h2 className="desktop-only" style={{ marginBottom: '30px', fontFamily: 'Orbitron', fontSize: '22px', color: '#00f3ff', textShadow: '0 0 5px #00f3ff' }}>
-        CYBER<span style={{color:'#bc13fe'}}>MIX</span>
+      <h2 className="desktop-only" style={{ marginBottom: '30px', fontFamily: 'Orbitron', fontSize: '22px', color: '#fff', textShadow: '0 0 5px #00f3ff' }}>
+        <span style={{ color: '#00f3ff' }}>DC</span> Music & Co.
       </h2>
 
       <div style={{ marginBottom: '30px' }}>
-        <input placeholder="SEARCH DATABASE..." onChange={(e) => onSearch(e.target.value)} />
+        <input placeholder="SEARCH DATABASE..." onChange={(e) => onSearch(e.target.value)} style={{ width: '100%' }} />
       </div>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -57,8 +69,13 @@ const Sidebar = ({ role, setView, currentView, onSearch, onPlaylistClick }) => {
           ))}
       </div>
 
+      <div className="desktop-only" style={{ marginTop: '20px', borderTop: '1px solid #222', paddingTop: '15px' }}>
+          <button onClick={() => fileInputRef.current.click()} style={{ background: 'none', border: '1px solid #333', color: '#555', padding: '5px', borderRadius: '0', fontSize: '10px', width: '100%', cursor: 'pointer', fontFamily: 'Orbitron' }}>[ UPDATE AVATAR ]</button>
+          <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleAvatarUpload} />
+      </div>
+
       {role === 'admin' && (
-        <div className="desktop-only" style={{ marginTop: '20px' }}>
+        <div className="desktop-only" style={{ marginTop: '10px' }}>
             <div className={getStyle('users')} onClick={() => setView('users')}>[ ADMIN PANEL ]</div>
         </div>
       )}
