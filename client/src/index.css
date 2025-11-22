@@ -1,0 +1,93 @@
+body {
+  margin: 0;
+  font-family: 'Circular Std', 'Helvetica Neue', sans-serif;
+  background-color: #121212;
+  color: white;
+  overflow: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #121212; }
+::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #888; }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in { animation: fadeIn 0.4s ease-out forwards; }
+
+.card-hover:hover {
+  background-color: #282828 !important;
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+}
+
+.play-btn {
+  opacity: 0;
+  transition: all 0.3s ease;
+  position: absolute;
+  bottom: 15px; right: 15px;
+  background: #1DB954; /* Spotify Green */
+  border-radius: 50%;
+  width: 48px; height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 4px; /* Optical adjustment for triangle */
+  
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  transform: translateY(10px);
+}
+.card-hover:hover .play-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sidebar-item {
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #b3b3b3;
+  font-weight: bold;
+  display: flex; align-items: center; gap: 10px;
+  transition: 0.2s;
+}
+.sidebar-item:hover, .sidebar-item.active {
+  color: white;
+  background-color: #282828;
+}
+
+.glass-player {
+  background: rgba(24, 24, 24, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #333;
+}
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.login-container {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+}
+
+.sidebar-btn {
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.2s;
+    font-weight: bold;
+    color: #b3b3b3;
+    display: flex; align-items: center; gap: 10px;
+}
+.sidebar-btn:hover, .sidebar-btn.active {
+    background-color: #282828;
+    color: white;
+}

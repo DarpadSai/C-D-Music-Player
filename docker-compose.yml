@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server/.env  # Uses your existing secrets
+    restart: always
+
+  client:
+    build: ./client
+    ports:
+      - "8080:80"      # Maps localhost:8080 to container port 80
+    depends_on:
+      - server
