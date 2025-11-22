@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import toast from 'react-hot-toast';
 
 const Sidebar = ({ role, onLogout, setView, currentView, onSearch, onPlaylistClick }) => {
   const [playlists, setPlaylists] = useState([]);
+  const fileInputRef = useRef(null);
 
   useEffect(() => { fetchPlaylists(); }, []);
 
@@ -26,19 +27,26 @@ const Sidebar = ({ role, onLogout, setView, currentView, onSearch, onPlaylistCli
       } catch (err) { toast.error("Failed to create"); }
   };
 
+  const handleAvatarUpload = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('file', file);
+      const loading = toast.loading("Updating Avatar...");
+      try {
+          const token = localStorage.getItem('token');
+          await api.post('/users/avatar', formData, { headers: { 'Authorization': token } });
+          toast.success("Avatar Updated (Refresh to see)");
+      } catch (err) { toast.error("Failed"); }
+      finally { toast.dismiss(loading); }
+  };
+
   const getStyle = (viewName) => `sidebar-btn ${currentView === viewName ? 'active' : ''}`;
 
   return (
     <div style={{ 
-        background: 'black', 
-        padding: '20px', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        height: '100%', 
-        boxSizing: 'border-box', 
-        overflowY: 'auto',
-        // FIX: Extra padding at bottom to prevent Player overlap
-        paddingBottom: '120px' 
+        background: 'black', padding: '20px', display: 'flex', flexDirection: 'column', 
+        height: '100%', boxSizing: 'border-box', overflowY: 'auto', paddingBottom: '120px' 
     }}>
       <h2 className="desktop-only" style={{ marginBottom: '25px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '22px' }}>
         <span style={{ color: '#1DB954' }}>l|l</span> DC Music & Co.
@@ -70,17 +78,19 @@ const Sidebar = ({ role, onLogout, setView, currentView, onSearch, onPlaylistCli
           ))}
       </div>
 
+      <div className="desktop-only" style={{ marginTop: '20px', borderTop: '1px solid #222', paddingTop: '15px' }}>
+          <button onClick={() => fileInputRef.current.click()} style={{ background: 'none', border: '1px solid #333', color: '#aaa', padding: '5px', borderRadius: '10px', fontSize: '11px', width: '100%', cursor: 'pointer' }}>📷 Change Avatar</button>
+          <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleAvatarUpload} />
+      </div>
+
       {role === 'admin' && (
-        <div style={{ marginTop: 'auto', borderTop: '1px solid #222', paddingTop: '15px' }}>
-            <div className="desktop-only" style={{ fontSize: '11px', color: '#aaa', marginBottom: '10px' }}>ADMIN</div>
-            <div className={getStyle('users')} onClick={() => setView('users')}>👥 <span className="desktop-only">Users</span></div>
+        <div className="desktop-only" style={{ marginTop: '10px' }}>
+            <div className={getStyle('users')} onClick={() => setView('users')}>👥 Users</div>
         </div>
       )}
 
       <div className="desktop-only" style={{ marginTop: '10px' }}>
-        <div className="sidebar-btn" onClick={onLogout} style={{ color: '#ff5555' }}>
-          🚪 Logout
-        </div>
+        <div className="sidebar-btn" onClick={onLogout} style={{ color: '#ff5555' }}>🚪 Logout</div>
       </div>
     </div>
   );
