@@ -11,16 +11,18 @@
   --glass-border: 1px solid rgba(0, 243, 255, 0.2);
 }
 
+/* --- GLOBAL RESET --- */
 body {
   margin: 0;
   font-family: 'Rajdhani', sans-serif; /* Tech font */
   background-color: var(--bg-dark);
   color: var(--text-main);
   overflow: hidden;
+  /* Cyber Grid Background */
   background-image: 
     linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-  background-size: 30px 30px; /* Grid Effect */
+  background-size: 30px 30px;
 }
 
 /* SCROLLBAR */
@@ -28,20 +30,34 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg-dark); }
 ::-webkit-scrollbar-thumb { background: var(--neon-pink); border-radius: 0; }
 
+/* --- LAYOUT (RESTORED) --- */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-container {
+  width: 240px;
+  height: 100%;
+  flex-shrink: 0;
+  z-index: 50;
+  border-right: 1px solid rgba(0, 243, 255, 0.1);
+}
+
+.main-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
 /* --- ANIMATIONS --- */
 @keyframes neonPulse {
   0% { box-shadow: 0 0 5px var(--neon-blue); }
   50% { box-shadow: 0 0 20px var(--neon-blue), 0 0 10px var(--neon-pink); }
   100% { box-shadow: 0 0 5px var(--neon-blue); }
-}
-
-@keyframes glitch {
-  0% { transform: translate(0) }
-  20% { transform: translate(-2px, 2px) }
-  40% { transform: translate(-2px, -2px) }
-  60% { transform: translate(2px, 2px) }
-  80% { transform: translate(2px, -2px) }
-  100% { transform: translate(0) }
 }
 
 .fade-in { animation: fadeIn 0.5s ease forwards; }
@@ -57,28 +73,11 @@ input {
   color: var(--neon-blue) !important;
   font-family: 'Orbitron', sans-serif;
   letter-spacing: 1px;
+  padding: 10px;
+  outline: none;
 }
 input:focus {
   box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
-  outline: none;
-}
-
-/* Cyber Buttons */
-button.cyber-btn {
-  background: transparent;
-  border: 1px solid var(--neon-pink);
-  color: var(--neon-pink);
-  text-transform: uppercase;
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 2px;
-  transition: 0.3s;
-  box-shadow: 0 0 5px var(--neon-pink);
-}
-button.cyber-btn:hover {
-  background: var(--neon-pink);
-  color: black;
-  box-shadow: 0 0 20px var(--neon-pink);
-  text-shadow: none;
 }
 
 /* Cards */
@@ -94,20 +93,22 @@ button.cyber-btn:hover {
   transform: translateY(-5px);
 }
 
-/* Play Button */
-.play-btn {
-  background: var(--neon-blue) !important;
-  color: black !important;
-  box-shadow: 0 0 15px var(--neon-blue);
-  border-radius: 0 !important; /* Square for cyberpunk feel */
-  clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+/* Cyber Buttons */
+button.cyber-btn, .cyber-btn {
+  background: transparent;
+  border: 1px solid var(--neon-pink);
+  color: var(--neon-pink);
+  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 2px;
+  transition: 0.3s;
+  box-shadow: 0 0 5px var(--neon-pink);
+  cursor: pointer;
 }
-
-/* Sidebar & Player */
-.glass-player {
-  background: rgba(10, 10, 10, 0.9) !important;
-  border-top: 1px solid var(--neon-pink) !important;
-  box-shadow: 0 -5px 20px rgba(188, 19, 254, 0.1);
+button.cyber-btn:hover {
+  background: var(--neon-pink);
+  color: black;
+  box-shadow: 0 0 20px var(--neon-pink);
 }
 
 /* Sidebar Active State */
@@ -115,28 +116,40 @@ button.cyber-btn:hover {
   color: var(--neon-blue) !important;
   background: rgba(0, 243, 255, 0.1) !important;
   border-right: 3px solid var(--neon-blue);
+  box-shadow: inset 10px 0 20px -10px rgba(0, 243, 255, 0.3);
 }
 
-/* Login BG */
-.login-bg {
-  background: #000;
-  position: relative;
+.sidebar-btn {
+  padding: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: bold;
+  color: #888;
 }
-.login-bg::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: 
-    radial-gradient(circle at 50% 50%, rgba(188, 19, 254, 0.1), transparent 60%),
-    linear-gradient(0deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 20px;
-  z-index: -1;
+.sidebar-btn:hover {
+  color: white;
+  text-shadow: 0 0 5px white;
 }
+
+/* Play Button */
+.play-btn {
+  background: var(--neon-blue) !important;
+  color: black !important;
+  box-shadow: 0 0 15px var(--neon-blue);
+  border-radius: 0 !important; /* Square for cyberpunk feel */
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justifyContent: center;
+  position: absolute; bottom: 15px; right: 15px;
+  opacity: 0; transition: 0.3s;
+  clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+}
+.card-hover:hover .play-btn { opacity: 1; }
 
 /* Dropdown Menu */
 .dropdown-menu {
   position: absolute;
-  top: 60px; right: 30px;
+  top: 40px; right: 0;
   background: #000;
   border: 1px solid var(--neon-blue);
   width: 200px;
@@ -154,4 +167,31 @@ button.cyber-btn:hover {
 .dropdown-item:hover {
   background: var(--neon-blue);
   color: black;
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+  .app-layout { flexDirection: column; }
+  
+  .sidebar-container {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    width: 100%; height: auto;
+    background: #000; border-top: 1px solid var(--neon-pink);
+    z-index: 500; padding: 10px;
+    display: flex; flexDirection: row !important;
+    justifyContent: space-around; alignItems: center;
+  }
+
+  .desktop-only { display: none !important; }
+  .main-view { padding-bottom: 160px; }
+  .glass-player { bottom: 60px !important; background: #000 !important; border-top: 1px solid var(--neon-blue); }
+}
+
+/* Login BG */
+.login-bg { background: #000; position: relative; }
+.login-bg::before {
+  content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(188, 19, 254, 0.1), transparent 60%),
+              linear-gradient(0deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 20px; z-index: -1;
 }
