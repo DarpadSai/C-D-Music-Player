@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 
-// --- CONFIGURATION ---
-// Use your actual Render Backend URL here
+// CONFIGURATION
 const BACKEND_URL = "https://dc-music-player-backend.onrender.com";
 
 const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick }) => {
@@ -72,10 +71,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
       alert('Uploaded! Metadata extracted automatically.');
       setShowUpload(false);
       fetchSongs();
-    } catch (err) { 
-        console.error(err);
-        alert('Upload Failed. Ensure file is audio.'); 
-    } 
+    } catch (err) { alert('Upload Failed'); } 
     finally { setUploading(false); }
   };
 
@@ -123,13 +119,11 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
           return (
               <div style={{ width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap' }}>
                   {songs.slice(0, 4).map(song => (
-                      // DIRECT LINK to backend for images
                       <img key={song._id} src={`${BACKEND_URL}/songs/${song._id}/cover`} alt="" style={{ width: '50%', height: '50%', objectFit: 'cover' }} />
                   ))}
               </div>
           );
       }
-      // DIRECT LINK to backend for images
       return <img src={`${BACKEND_URL}/songs/${songs[0]._id}/cover`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
   };
 
@@ -144,7 +138,6 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
         <h1 style={{ fontSize: '32px', fontWeight: '800', textTransform: 'capitalize' }}>
             {view === 'playlist' ? playlistName || 'Playlist' : view}
         </h1>
-        
         {role === 'admin' && (
           <button onClick={() => setShowUpload(!showUpload)} style={{ background: '#1DB954', border: 'none', padding: '12px 24px', borderRadius: '30px', color: 'black', fontWeight: 'bold', cursor: 'pointer' }}>
             {showUpload ? 'Close Upload' : 'Upload Song'}
@@ -152,39 +145,19 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
         )}
       </div>
 
-      {/* FEATURED PLAYLISTS */}
       {view === 'home' && publicPlaylists.length > 0 && (
           <div style={{ marginBottom: '40px' }}>
               <h3 style={{ fontSize: '20px', marginBottom: '15px', color: 'white' }}>Featured Playlists</h3>
               <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '10px' }}>
                   {publicPlaylists.map((pl) => (
-                      <div 
-                        key={pl._id} 
-                        onClick={() => onPlaylistClick(pl._id)}
-                        className="card-hover" 
-                        style={{ 
-                            minWidth: '180px', 
-                            maxWidth: '200px', 
-                            background: '#181818', 
-                            padding: '16px', 
-                            borderRadius: '8px', 
-                            cursor: 'pointer', 
-                            position: 'relative' 
-                        }}
-                      >
+                      <div key={pl._id} onClick={() => onPlaylistClick(pl._id)} className="card-hover" style={{ minWidth: '180px', maxWidth: '200px', background: '#181818', padding: '16px', borderRadius: '8px', cursor: 'pointer', position: 'relative' }}>
                           <div style={{ width: '100%', aspectRatio: '1/1', borderRadius: '6px', marginBottom: '10px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
                               <PlaylistCover songs={pl.songs} />
                           </div>
                           <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pl.name}</div>
                           <div style={{ fontSize: '12px', color: '#aaa' }}>By Admin</div>
-
                           {role === 'admin' && (
-                              <button 
-                                onClick={(e) => deletePlaylist(e, pl._id)}
-                                style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#ff5555', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                              >
-                                  🗑
-                              </button>
+                              <button onClick={(e) => deletePlaylist(e, pl._id)} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#ff5555', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🗑</button>
                           )}
                       </div>
                   ))}
@@ -192,57 +165,42 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
           </div>
       )}
 
-      {/* UPLOAD FORM */}
       {showUpload && (
         <div className="fade-in" style={{ background: '#282828', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
-            <h3>Upload New Track (Auto-Metadata)</h3>
+            <h3>Upload New Track</h3>
             <form onSubmit={handleUpload} style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                 <input type="file" onChange={e => setFile(e.target.files[0])} accept="audio/*" style={{ color: 'white' }} required />
-                <button type="submit" disabled={uploading} style={{ padding: '10px 20px', background: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer' }}>
-                    {uploading ? 'Processing...' : 'Upload'}
-                </button>
+                <button type="submit" disabled={uploading} style={{ padding: '10px 20px', background: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer' }}>{uploading ? 'Processing...' : 'Upload'}</button>
             </form>
-            <p style={{ color: '#aaa', fontSize: '12px', marginTop: '8px' }}>
-                Cover Art, Title, and Artist will be extracted automatically from the MP3 tags.
-            </p>
         </div>
       )}
 
-      {/* SONG LIST GRID */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '24px' }}>
         {filteredSongs.map((song, i) => (
           <div key={song._id} className="card-hover fade-in" style={{ background: '#181818', padding: '16px', borderRadius: '8px', position: 'relative' }}>
-            
             <div onClick={() => onPlay(song, filteredSongs)} style={{ cursor: 'pointer' }}>
-                
                 <div style={{ width: '100%', aspectRatio: '1/1', borderRadius: '6px', marginBottom: '16px', position: 'relative', overflow: 'hidden', background: '#333' }}>
-                    {/* DIRECT LINK to backend for image */}
-                    <img 
-                        src={`${BACKEND_URL}/songs/${song._id}/cover`} 
-                        alt={song.title}
-                        onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                    <div style={{ display: 'none', width: '100%', height: '100%', background: `linear-gradient(135deg, hsl(${i * 50}, 60%, 50%), hsl(${i * 50 + 40}, 60%, 30%))`, alignItems: 'center', justifyContent: 'center', position: 'absolute', top: 0 }}>
-                        <span style={{ fontSize: '40px' }}>🎵</span>
+                    <img src={`${BACKEND_URL}/songs/${song._id}/cover`} alt={song.title} onError={(e) => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ display: 'none', width: '100%', height: '100%', background: `linear-gradient(135deg, hsl(${i * 50}, 60%, 50%), hsl(${i * 50 + 40}, 60%, 30%))`, alignItems: 'center', justifyContent: 'center', position: 'absolute', top: 0 }}><span style={{ fontSize: '40px' }}>🎵</span></div>
+                    
+                    {/* FIX: SVG PLAY BUTTON FOR PERFECT CENTERING */}
+                    <div className="play-btn">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '4px' }}>
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
                     </div>
-                    <div className="play-btn">▶</div>
-                </div>
 
+                </div>
                 <div style={{ fontSize: '16px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{song.title}</div>
                 <div style={{ fontSize: '14px', color: '#b3b3b3' }}>{song.artist}</div>
             </div>
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
                 <button onClick={(e) => toggleLike(e, song._id)} style={{ background: 'none', border: 'none', color: song.isLiked ? '#1DB954' : '#b3b3b3', fontSize: '20px', cursor: 'pointer' }}>{song.isLiked ? '♥' : '♡'}</button>
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <button onClick={() => setShowAddToPlaylist(song._id)} style={{ background: 'none', border: 'none', color: '#b3b3b3', fontSize: '20px', cursor: 'pointer' }}>+</button>
-                    {role === 'admin' && (
-                        <button onClick={(e) => deleteSong(e, song._id)} style={{ background: 'none', border: 'none', color: '#ff5555', fontSize: '20px', cursor: 'pointer' }}>🗑</button>
-                    )}
+                    {role === 'admin' && <button onClick={(e) => deleteSong(e, song._id)} style={{ background: 'none', border: 'none', color: '#ff5555', fontSize: '20px', cursor: 'pointer' }}>🗑</button>}
                 </div>
             </div>
-
             {showAddToPlaylist === song._id && (
                 <div style={{ position: 'absolute', top: '100%', left: 0, background: '#282828', padding: '10px', borderRadius: '4px', zIndex: 10, width: '100%', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
                     <div style={{ fontSize: '12px', color: '#aaa', marginBottom: '5px' }}>Add to:</div>

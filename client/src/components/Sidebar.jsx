@@ -30,15 +30,20 @@ const Sidebar = ({ role, onLogout, setView, currentView, onSearch, onPlaylistCli
 
   return (
     <div style={{ 
-        background: 'black', padding: '20px', display: 'flex', flexDirection: 'column', 
-        height: '100%', boxSizing: 'border-box', overflowY: 'auto'
+        background: 'black', 
+        padding: '20px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: '100%', 
+        boxSizing: 'border-box', 
+        overflowY: 'auto',
+        // FIX: Extra padding at bottom to prevent Player overlap
+        paddingBottom: '120px' 
     }}>
-      {/* Logo - Hidden on Mobile to save space */}
       <h2 className="desktop-only" style={{ marginBottom: '25px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '22px' }}>
         <span style={{ color: '#1DB954' }}>l|l</span> DC Music & Co.
       </h2>
 
-      {/* Search - Adapted for Mobile */}
       <div style={{ marginBottom: '20px' }}>
         <input 
             placeholder="🔍 Search..." 
@@ -47,7 +52,6 @@ const Sidebar = ({ role, onLogout, setView, currentView, onSearch, onPlaylistCli
         />
       </div>
       
-      {/* Nav Items */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
           <div className={getStyle('home')} onClick={() => setView('home')}>🏠 <span className="desktop-only">Home</span></div>
           <div className={getStyle('liked')} onClick={() => setView('liked')}>💜 <span className="desktop-only">Liked</span></div>
@@ -58,7 +62,6 @@ const Sidebar = ({ role, onLogout, setView, currentView, onSearch, onPlaylistCli
           <span onClick={createPlaylist} style={{ cursor: 'pointer', fontSize: '18px', color: 'white', background: '#282828', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</span>
       </div>
 
-      {/* Playlists (Desktop Only) */}
       <div className="desktop-only" style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px', flex: 1, overflowY: 'auto' }}>
           {playlists.map(pl => (
               <div key={pl._id} className="sidebar-btn" onClick={() => onPlaylistClick(pl._id)} style={{ fontSize: '14px' }}>
@@ -67,7 +70,6 @@ const Sidebar = ({ role, onLogout, setView, currentView, onSearch, onPlaylistCli
           ))}
       </div>
 
-      {/* Admin Section */}
       {role === 'admin' && (
         <div style={{ marginTop: 'auto', borderTop: '1px solid #222', paddingTop: '15px' }}>
             <div className="desktop-only" style={{ fontSize: '11px', color: '#aaa', marginBottom: '10px' }}>ADMIN</div>
