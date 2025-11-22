@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import toast from 'react-hot-toast';
 
-// Ensure this matches your Render URL exactly
+// CONFIGURATION: Direct link to Backend to bypass Nginx proxy issues
 const BACKEND_URL = "https://dc-music-player-backend.onrender.com";
 
 const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick }) => {
@@ -20,7 +20,10 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
+  // Initial Fetch
   useEffect(() => { fetchSongs(); fetchUserPlaylists(); }, [view, playlistId]);
+  
+  // Fetch Featured Playlists only on Home
   useEffect(() => { if (view === 'home') fetchPublicPlaylists(); }, [view]);
 
   const fetchPublicPlaylists = async () => {
@@ -56,7 +59,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
       } catch(e) {}
   };
 
-  // --- ROBUST UPLOAD LOGIC ---
+  // --- UPLOAD LOGIC ---
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) return toast.error("Please select a file");
@@ -77,7 +80,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
         console.error(err);
         toast.error("Upload Failed. Check file size.", { id: toastId });
     } 
-    finally { setUploading(false); } // Always reset button
+    finally { setUploading(false); }
   };
 
   // --- EDIT LOGIC ---
@@ -129,18 +132,23 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
       } catch(e) { toast.error("Failed"); }
   };
 
+  // Helper to generate the grid cover image
+  const PlaylistCover = ({ songs }) => {
+      if (!songs || songs.length === 0) return <div style={{ width: '100%', height: '100%', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>💿</div>;
+      // Use Direct Backend URL to avoid proxy issues
+      return <img src={`${BACKEND_URL}/songs/${songs[0]._id}/cover`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
+  };
+
+  // Search Filter
   const filteredSongs = songs.filter(s => 
       (s.title && s.title.toLowerCase().includes(searchQuery.toLowerCase())) || 
       (s.artist && s.artist.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const PlaylistCover = ({ songs }) => {
-      if (!songs || songs.length === 0) return <div style={{ width: '100%', height: '100%', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>💿</div>;
-      return <img src={`${BACKEND_URL}/songs/${songs[0]._id}/cover`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
-  };
-
   return (
     <div style={{ padding: '30px', paddingBottom: '140px' }}>
+      
+      {/* HEADER SECTION */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h1 className="fade-in" style={{ fontSize: '32px', fontWeight: '800', margin: 0, textTransform: 'capitalize', letterSpacing: '-1px' }}>
             {view === 'playlist' ? playlistName || 'Playlist' : view === 'home' ? 'Home' : 'Liked Songs'}
@@ -153,23 +161,23 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
         )}
       </div>
 
-      {/* UPLOAD MODAL */}
+      {/* UPLOAD MODAL POPUP */}
       {showUpload && (
         <div className="modal-overlay" onClick={() => setShowUpload(false)}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <h3 style={{ marginTop: 0, marginBottom: '20px' }}>Upload New Track</h3>
                 <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    <input type="file" onChange={e => setFile(e.target.files[0])} accept="audio/*" style={{ color: '#fff' }} required />
+                    <input type="file" onChange={e => setFile(e.target.files[0])} accept="audio/*" style={{ color: '#fff', cursor: 'pointer' }} required />
                     <button type="submit" disabled={uploading} style={{ padding: '12px', background: '#818cf8', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
                         {uploading ? 'Processing...' : 'Upload Track'}
                     </button>
                 </form>
-                <p style={{ fontSize: '12px', color: '#64748b', marginTop: '15px' }}>Metadata will be auto-extracted.</p>
+                <p style={{ fontSize: '12px', color: '#64748b', marginTop: '15px' }}>Metadata (Title, Artist, Art) will be auto-extracted.</p>
             </div>
         </div>
       )}
 
-      {/* EDIT MODAL */}
+      {/* EDIT MODAL POPUP */}
       {editMode && (
           <div className="modal-overlay">
               <div className="modal-content">
@@ -186,7 +194,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
           </div>
       )}
 
-      {/* FEATURED PLAYLISTS */}
+      {/* FEATURED PLAYLISTS (Only on Home) */}
       {view === 'home' && publicPlaylists.length > 0 && (
           <div className="fade-in" style={{ marginBottom: '40px' }}>
               <h3 style={{ fontSize: '14px', color: '#94a3b8', fontWeight: '600', letterSpacing: '1px', marginBottom: '15px' }}>FEATURED PLAYLISTS</h3>
@@ -217,6 +225,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
             {filteredSongs.map((song, i) => (
               <div key={song._id} className="card-hover fade-in" style={{ padding: '16px', cursor: 'pointer', position: 'relative', animationDelay: `${i * 0.05}s` }}>
                 
+                {/* Click to Play */}
                 <div onClick={() => onPlay(song, filteredSongs)}>
                     <div style={{ width: '100%', aspectRatio: '1/1', borderRadius: '8px', marginBottom: '12px', position: 'relative', overflow: 'hidden', background: '#1e293b' }}>
                         <img 
@@ -229,7 +238,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
                             <span style={{ fontSize: '30px' }}>🎵</span>
                         </div>
                         
-                        {/* Centered Play Button */}
+                        {/* Play Button */}
                         <div className="play-btn">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: '2px' }}><path d="M8 5v14l11-7z" /></svg>
                         </div>
@@ -239,6 +248,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
                     <div style={{ fontSize: '13px', color: '#94a3b8' }}>{song.artist}</div>
                 </div>
                 
+                {/* Action Buttons Row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', alignItems: 'center' }}>
                     <button onClick={(e) => toggleLike(e, song._id)} style={{ background: 'none', border: 'none', color: song.isLiked ? '#818cf8' : '#64748b', fontSize: '18px', cursor: 'pointer' }}>{song.isLiked ? '♥' : '♡'}</button>
                     
