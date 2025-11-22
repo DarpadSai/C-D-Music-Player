@@ -67,7 +67,7 @@ const Sidebar = ({ role, setView, currentView, onSearch, onPlaylistClick, onAvat
     }}>
       
       <h2 className="desktop-only" style={{ marginBottom: '30px', fontSize: '24px', fontWeight: '800', color: '#fff', letterSpacing: '-0.5px' }}>
-        <span style={{ color: '#818cf8' }}>DC</span> Music.
+        <span style={{ color: '#818cf8' }}>DC</span> Music & Co.
       </h2>
 
       <div style={{ marginBottom: '25px' }}>
