@@ -1,164 +1,157 @@
-/* GLOBAL RESET & FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap');
+
+:root {
+  --bg-dark: #050505;
+  --bg-panel: #0a0a0a;
+  --neon-blue: #00f3ff;
+  --neon-pink: #bc13fe;
+  --neon-green: #0aff0a;
+  --text-main: #e0f7fa;
+  --text-dim: #94a3b8;
+  --glass-border: 1px solid rgba(0, 243, 255, 0.2);
+}
+
 body {
   margin: 0;
-  font-family: 'Circular Std', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: #121212;
-  color: white;
-  overflow: hidden; /* Prevent body scroll, we scroll inner containers */
+  font-family: 'Rajdhani', sans-serif; /* Tech font */
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  overflow: hidden;
+  background-image: 
+    linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px; /* Grid Effect */
 }
 
-/* CUSTOM SCROLLBAR */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #121212; }
-::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #888; }
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: var(--neon-pink); border-radius: 0; }
 
 /* --- ANIMATIONS --- */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes neonPulse {
+  0% { box-shadow: 0 0 5px var(--neon-blue); }
+  50% { box-shadow: 0 0 20px var(--neon-blue), 0 0 10px var(--neon-pink); }
+  100% { box-shadow: 0 0 5px var(--neon-blue); }
 }
 
-.fade-in {
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
 }
 
-/* --- CARD STYLES --- */
+.fade-in { animation: fadeIn 0.5s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* --- COMPONENTS --- */
+
+/* Cyber Input Fields */
+input {
+  background: rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid #333 !important;
+  border-left: 2px solid var(--neon-blue) !important;
+  color: var(--neon-blue) !important;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1px;
+}
+input:focus {
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+  outline: none;
+}
+
+/* Cyber Buttons */
+button.cyber-btn {
+  background: transparent;
+  border: 1px solid var(--neon-pink);
+  color: var(--neon-pink);
+  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 2px;
+  transition: 0.3s;
+  box-shadow: 0 0 5px var(--neon-pink);
+}
+button.cyber-btn:hover {
+  background: var(--neon-pink);
+  color: black;
+  box-shadow: 0 0 20px var(--neon-pink);
+  text-shadow: none;
+}
+
+/* Cards */
 .card-hover {
-  transition: all 0.3s ease;
+  background: rgba(20, 20, 20, 0.6) !important;
+  border: var(--glass-border);
+  backdrop-filter: blur(5px);
+  transition: 0.3s;
 }
 .card-hover:hover {
-  background-color: #282828 !important;
-  transform: translateY(-4px);
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+  transform: translateY(-5px);
 }
 
-/* FIX: Perfect Centering for Play Button */
+/* Play Button */
 .play-btn {
-  opacity: 0;
-  transition: all 0.3s ease;
-  position: absolute;
-  bottom: 15px; right: 15px;
-  background: #1DB954; /* Spotify Green */
-  border-radius: 50%;
-  width: 48px; height: 48px;
-  
-  /* FLEXBOX CENTERING MAGIC */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  transform: translateY(10px);
+  background: var(--neon-blue) !important;
+  color: black !important;
+  box-shadow: 0 0 15px var(--neon-blue);
+  border-radius: 0 !important; /* Square for cyberpunk feel */
+  clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
 }
 
-/* Adjust SVG icon slightly if needed visually */
-.play-btn svg {
-  margin-left: 2px; /* Visual optical centering for triangle icons */
+/* Sidebar & Player */
+.glass-player {
+  background: rgba(10, 10, 10, 0.9) !important;
+  border-top: 1px solid var(--neon-pink) !important;
+  box-shadow: 0 -5px 20px rgba(188, 19, 254, 0.1);
 }
 
-.card-hover:hover .play-btn {
-  opacity: 1;
-  transform: translateY(0);
+/* Sidebar Active State */
+.sidebar-btn.active {
+  color: var(--neon-blue) !important;
+  background: rgba(0, 243, 255, 0.1) !important;
+  border-right: 3px solid var(--neon-blue);
 }
 
-/* --- MAIN LAYOUT --- */
-
-.app-layout {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.sidebar-container {
-  width: 240px;
-  height: 100%;
-  flex-shrink: 0;
-  z-index: 50;
-}
-
-.main-view {
-  flex: 1;
-  display: flex;
-  flex-direction: column; /* CRITICAL: Stacks Header ABOVE Content */
-  height: 100%;
+/* Login BG */
+.login-bg {
+  background: #000;
   position: relative;
 }
-
-/* --- GLASSMORPHISM PLAYER --- */
-.glass-player {
-  background: rgba(24, 24, 24, 0.95);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid #333;
-  transition: bottom 0.3s ease;
+.login-bg::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(188, 19, 254, 0.1), transparent 60%),
+    linear-gradient(0deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 20px;
+  z-index: -1;
 }
 
-/* --- SIDEBAR BUTTONS --- */
-.sidebar-btn {
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #b3b3b3;
-  font-weight: bold;
-  display: flex; align-items: center; gap: 10px;
-  transition: 0.2s;
-  margin-bottom: 2px;
+/* Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  top: 60px; right: 30px;
+  background: #000;
+  border: 1px solid var(--neon-blue);
+  width: 200px;
+  z-index: 1000;
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
 }
-.sidebar-btn:hover, .sidebar-btn.active {
+.dropdown-item {
+  padding: 15px;
   color: white;
-  background-color: #282828;
+  cursor: pointer;
+  border-bottom: 1px solid #222;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
 }
-
-/* --- MOBILE RESPONSIVENESS (Max width 768px) --- */
-@media (max-width: 768px) {
-  .app-layout {
-    flex-direction: column;
-  }
-  
-  /* Transform Sidebar into Bottom Navigation Bar */
-  .sidebar-container {
-    position: fixed;
-    bottom: 0; 
-    left: 0; 
-    right: 0;
-    width: 100%; 
-    height: auto; /* Height adapts to content */
-    background: #000;
-    border-top: 1px solid #333;
-    z-index: 500; /* Highest priority */
-    padding: 10px;
-    
-    /* Horizontal Layout for Nav */
-    display: flex;
-    flex-direction: row !important; 
-    justify-content: space-around;
-    align-items: center;
-  }
-
-  /* Hide Desktop-only elements to save space */
-  .desktop-only { 
-    display: none !important; 
-  }
-  
-  /* Adjust Main View padding so content isn't hidden behind nav */
-  .main-view {
-    padding-bottom: 150px; /* Space for Player + Bottom Nav */
-  }
-
-  /* Move the Music Player UP so it sits on top of the Bottom Nav */
-  .glass-player { 
-    bottom: 60px !important; /* Approximate height of bottom nav */
-  }
-}
-
-/* --- LOGIN PAGE BACKGROUND --- */
-.login-bg {
-  background: linear-gradient(-45deg, #1DB954, #191414, #535353, #121212);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
-}
-
-@keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.dropdown-item:hover {
+  background: var(--neon-blue);
+  color: black;
 }

@@ -5,9 +5,10 @@ import Player from './components/Player';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
 import UserList from './components/UserList';
+import UserProfile from './components/UserProfile'; // Import new component
 
 function App() {
-  // State
+  // ... state ...
   const [currentSong, setCurrentSong] = useState(null);
   const [role, setRole] = useState(null);
   const [username, setUsername] = useState('');
@@ -16,93 +17,76 @@ function App() {
   const [activePlaylistId, setActivePlaylistId] = useState(null);
   const [songQueue, setSongQueue] = useState([]);
   
-  // NEW FEATURES STATE
-  const [isShuffle, setIsShuffle] = useState(false);
-  const [repeatMode, setRepeatMode] = useState(0); // 0: Off, 1: All, 2: One
+  // NEW: Dropdown State
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
+  // ... useEffect for token ...
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const savedRole = localStorage.getItem('role');
-    const savedName = localStorage.getItem('username');
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const savedRole = localStorage.getItem('role') || sessionStorage.getItem('role');
+    const savedName = localStorage.getItem('username') || sessionStorage.getItem('username');
     if (token) { setRole(savedRole); setUsername(savedName); }
   }, []);
 
-  const handleLogin = (newRole, newName) => { setRole(newRole); setUsername(newName); setView('home'); };
-  const handleLogout = () => { localStorage.clear(); setRole(null); setCurrentSong(null); setView('home'); };
-  const handlePlaylistClick = (id) => { setActivePlaylistId(id); setView('playlist'); };
+  // ... handlers (handlePlaySong, handleNext, etc - keep same) ...
   const handlePlaySong = (song, allSongs) => { setCurrentSong(song); setSongQueue(allSongs); };
+  const handleNext = () => { /* ... keep logic ... */ };
+  const handlePrev = () => { /* ... keep logic ... */ };
+  const handlePlaylistClick = (id) => { setActivePlaylistId(id); setView('playlist'); };
 
-  // --- ADVANCED PLAYBACK LOGIC ---
-  
-  const handleNext = () => {
-      if (!currentSong || songQueue.length === 0) return;
-      
-      // Repeat One Logic handled in Player (it won't call next), 
-      // but if called manually:
-      if (repeatMode === 2) { 
-          // Just replay same song (Frontend player will handle seeking to 0)
-          return; 
-      }
-
-      let nextIndex;
-      if (isShuffle) {
-          // Random Index
-          nextIndex = Math.floor(Math.random() * songQueue.length);
-      } else {
-          // Sequential
-          const currentIndex = songQueue.findIndex(s => s._id === currentSong._id);
-          nextIndex = currentIndex + 1;
-          
-          // Repeat All Logic
-          if (nextIndex >= songQueue.length) {
-              if (repeatMode === 1) nextIndex = 0; // Loop back
-              else return; // Stop at end
-          }
-      }
-      setCurrentSong(songQueue[nextIndex]);
+  const handleLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    setRole(null);
+    setCurrentSong(null);
+    setView('home');
+    setShowUserMenu(false);
   };
 
-  const handlePrev = () => {
-      if (!currentSong || songQueue.length === 0) return;
-      const currentIndex = songQueue.findIndex(s => s._id === currentSong._id);
-      const prevIndex = currentIndex === 0 ? songQueue.length - 1 : currentIndex - 1;
-      setCurrentSong(songQueue[prevIndex]);
-  };
+  if (!role) return <><Toaster position="top-center" toastOptions={{style:{background:'#000', color:'#00f3ff', border:'1px solid #00f3ff'}}} /><Login onLogin={(r, u) => {setRole(r); setUsername(u); setView('home');}} /></>;
 
-  if (!role) return <><Toaster position="top-center" toastOptions={{ style: { background: '#333', color: '#fff' } }} /><Login onLogin={handleLogin} /></>;
-
-  // Calculate Avatar URL
-  const avatarUrl = username ? `https://dc-music-player-backend.onrender.com/users/${username}/avatar?t=${new Date().getTime()}` : null;
+  const contentHeight = currentSong ? 'calc(100vh - 90px)' : '100vh';
 
   return (
     <div className="app-layout">
-      <Toaster position="top-center" toastOptions={{ style: { background: '#333', color: '#fff' } }} />
+      <Toaster position="top-center" toastOptions={{style:{background:'#000', color:'#00f3ff', border:'1px solid #00f3ff'}}} />
       
-      <div className="sidebar-container">
-          <Sidebar 
-            role={role} 
-            onLogout={handleLogout} 
-            setView={setView} 
-            currentView={view}
-            onSearch={setSearchQuery} 
-            onPlaylistClick={handlePlaylistClick}
-            username={username} // Pass for profile pic update
-          />
+      <div className="sidebar-container" style={{height: contentHeight}}>
+          {/* Pass empty onLogout because we removed the button from sidebar */}
+          <Sidebar role={role} onLogout={() => {}} setView={setView} currentView={view} onSearch={setSearchQuery} onPlaylistClick={handlePlaylistClick} />
       </div>
       
-      <div className="main-view">
-        <div style={{ padding: '15px 30px', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backdropFilter: 'blur(10px)' }}>
-             <div style={{ color: '#aaa', fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>{view}</div>
+      <div className="main-view" style={{height: contentHeight}}>
+        {/* HEADER WITH DROPDOWN */}
+        <div style={{ padding: '20px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0, 243, 255, 0.1)' }}>
+             <div style={{ color: '#bc13fe', fontFamily: 'Orbitron', letterSpacing: '2px' }}>
+                {view === 'home' && 'MAINFRAME // HOME'}
+                {view === 'library' && 'DATABASE // PLAYLISTS'}
+                {view === 'profile' && 'USER // SETTINGS'}
+             </div>
              
-             {/* PROFILE HEADER */}
-             <div style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 15px', borderRadius: '20px', fontWeight: 'bold', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <img src={avatarUrl} alt="User" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
-                {username}
+             {/* USER DROPDOWN AREA */}
+             <div style={{ position: 'relative' }}>
+                 <div 
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    style={{ cursor: 'pointer', border: '1px solid #00f3ff', padding: '8px 20px', color: '#00f3ff', fontFamily: 'Orbitron', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0, 243, 255, 0.05)' }}
+                 >
+                    {username} ▾
+                 </div>
+
+                 {showUserMenu && (
+                     <div className="dropdown-menu">
+                         <div className="dropdown-item" onClick={() => { setView('profile'); setShowUserMenu(false); }}>User Details</div>
+                         <div className="dropdown-item" style={{ color: '#ff0055' }} onClick={handleLogout}>Logout / Terminate</div>
+                     </div>
+                 )}
              </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', background: 'linear-gradient(180deg, #1e1e1e 0%, #121212 40%)' }}>
-           {view === 'users' && role === 'admin' ? <UserList /> : (
+        {/* CONTENT */}
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+           {view === 'users' && role === 'admin' ? <UserList /> : 
+            view === 'profile' ? <UserProfile /> : (
                <SongList 
                     onPlay={handlePlaySong} 
                     role={role} 
@@ -115,16 +99,7 @@ function App() {
         </div>
       </div>
       
-      {/* Pass new props to Player */}
-      <Player 
-        currentSong={currentSong} 
-        onNext={handleNext} 
-        onPrev={handlePrev}
-        isShuffle={isShuffle}
-        setIsShuffle={setIsShuffle}
-        repeatMode={repeatMode}
-        setRepeatMode={setRepeatMode}
-      />
+      <Player currentSong={currentSong} onNext={handleNext} onPrev={handlePrev} />
     </div>
   );
 }

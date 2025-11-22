@@ -1,104 +1,87 @@
 import React, { useState } from 'react';
 import api from '../api';
-import toast from 'react-hot-toast'; // New Notification Library
+import toast from 'react-hot-toast';
 
 const Login = ({ onLogin }) => {
   const [view, setView] = useState('login'); 
-  // Initialize state
   const [formData, setFormData] = useState({ username: '', password: '', adminKey: '' });
+  const [rememberMe, setRememberMe] = useState(false); // State for Checkbox
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const loadingToast = toast.loading('Processing...'); // Show loading spinner
+    const loadingToast = toast.loading('Accessing Mainframe...');
 
     try {
       if (view === 'login') {
         const res = await api.post('/login', formData);
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('role', res.data.role);
-        localStorage.setItem('username', res.data.username);
+        
+        // REMEMBER ME LOGIC
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem('token', res.data.token);
+        storage.setItem('role', res.data.role);
+        storage.setItem('username', res.data.username);
         
         toast.dismiss(loadingToast);
-        toast.success(`Welcome back, ${res.data.username}!`);
-        
-        // Clear fields
+        toast.success(`ACCESS GRANTED: ${res.data.username}`);
         setFormData({ username: '', password: '', adminKey: '' });
-        
-        // Force Home View
         onLogin(res.data.role, res.data.username); 
       } 
       else if (view === 'register') {
         await api.post('/register', formData);
         toast.dismiss(loadingToast);
-        toast.success('Account Created! Please Login.');
-        
-        // Clear fields & Switch view
+        toast.success('Identity Created. Login Required.');
         setFormData({ username: '', password: '', adminKey: '' });
         setView('login');
       }
     } catch (err) {
       toast.dismiss(loadingToast);
-      toast.error(err.response?.data?.err || 'Request Failed');
+      toast.error('ACCESS DENIED');
     }
   };
 
   return (
     <div className="login-bg" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100vw', position: 'fixed', top: 0, left: 0, zIndex: 1000 }}>
-      <div className="animate-enter" style={{ background: 'rgba(0,0,0,0.85)', padding: '40px', borderRadius: '16px', width: '350px', backdropFilter: 'blur(15px)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', color: 'white' }}>
+      <div className="fade-in" style={{ background: 'rgba(0,0,0,0.8)', padding: '40px', border: '1px solid #00f3ff', width: '350px', boxShadow: '0 0 30px rgba(0, 243, 255, 0.2)' }}>
         
-        <h1 style={{ textAlign: 'center', fontSize: '28px', fontWeight: '800', marginBottom: '5px', background: 'linear-gradient(to right, #1DB954, #fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          DC Music & Co.
+        <h1 style={{ textAlign: 'center', fontFamily: 'Orbitron', color: '#00f3ff', textShadow: '0 0 10px #00f3ff', marginBottom: '5px', fontSize: '26px' }}>
+          CYBER<span style={{color: '#bc13fe'}}>MIX</span>
         </h1>
-        <p style={{ textAlign: 'center', color: '#888', marginBottom: '30px', fontSize: '14px' }}>Premium Sound Experience</p>
+        <p style={{ textAlign: 'center', color: '#bc13fe', marginBottom: '30px', fontSize: '12px', letterSpacing: '2px' }}>SYSTEM V.2.0</p>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          {/* AutoComplete OFF prevents dropdowns history */}
-          <input 
-            name="username" 
-            placeholder="Username" 
-            value={formData.username}
-            onChange={handleChange} 
-            style={inputStyle} 
-            required 
-            autoComplete="off" 
-          />
-
-          <input 
-            type="password" 
-            name="password" 
-            placeholder="Password" 
-            value={formData.password}
-            onChange={handleChange} 
-            style={inputStyle} 
-            required 
-            autoComplete="new-password" 
-          />
+          <input name="username" placeholder="IDENTIFIER" value={formData.username} onChange={handleChange} style={inputStyle} required autoComplete="off" />
+          <input type="password" name="password" placeholder="PASSCODE" value={formData.password} onChange={handleChange} style={inputStyle} required />
 
           {view === 'register' && (
-            <input 
-                type="password" /* Hides Admin Key */
-                name="adminKey" 
-                placeholder="Admin Key (Confidential)" 
-                value={formData.adminKey}
-                onChange={handleChange} 
-                style={inputStyle} 
-                autoComplete="off"
-            />
+            <input type="password" name="adminKey" placeholder="ROOT KEY (OPTIONAL)" value={formData.adminKey} onChange={handleChange} style={inputStyle} autoComplete="off" />
           )}
 
-          <button type="submit" style={btnStyle}>
-            {view === 'login' ? 'Enter Studio' : 'Join the Club'}
+          {/* REMEMBER ME CHECKBOX */}
+          {view === 'login' && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#94a3b8', fontSize: '12px', cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={rememberMe} 
+                    onChange={(e) => setRememberMe(e.target.checked)} 
+                    style={{ width: '15px', height: '15px', margin: 0, border: '1px solid #00f3ff' }} 
+                  />
+                  Remember Session
+              </label>
+          )}
+
+          <button type="submit" className="cyber-btn" style={{ padding: '15px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
+            {view === 'login' ? 'INITIALIZE' : 'REGISTER'}
           </button>
         </form>
 
-        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '13px', color: '#bbb' }}>
+        <div style={{ marginTop: '25px', textAlign: 'center', fontSize: '12px', color: '#555', fontFamily: 'Orbitron' }}>
           {view === 'login' ? (
-            <span onClick={() => setView('register')} style={linkStyle}>Create an Account</span>
+            <span onClick={() => setView('register')} style={linkStyle}>[ CREATE NEW ID ]</span>
           ) : (
-            <span onClick={() => setView('login')} style={linkStyle}>Back to Login</span>
+            <span onClick={() => setView('login')} style={linkStyle}>[ RETURN TO LOGIN ]</span>
           )}
         </div>
       </div>
@@ -106,8 +89,7 @@ const Login = ({ onLogin }) => {
   );
 };
 
-const inputStyle = { padding: '14px', borderRadius: '8px', border: '1px solid #333', background: '#222', color: 'white', outline: 'none', fontSize: '14px', transition: '0.2s' };
-const btnStyle = { padding: '14px', borderRadius: '30px', border: 'none', background: '#1DB954', color: 'black', fontWeight: '800', cursor: 'pointer', marginTop: '10px', fontSize: '15px', letterSpacing: '0.5px', transition: 'transform 0.2s' };
-const linkStyle = { cursor: 'pointer', color: '#1DB954', fontWeight: 'bold' };
+const inputStyle = { padding: '15px', background: 'black', color: '#00f3ff', border: '1px solid #333', outline: 'none', fontSize: '14px' };
+const linkStyle = { cursor: 'pointer', color: '#00f3ff', letterSpacing: '1px' };
 
 export default Login;
