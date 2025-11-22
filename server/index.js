@@ -11,9 +11,20 @@ const Song = require('./models/Song');
 const Playlist = require('./models/Playlist');
 require('dotenv').config();
 
+
+
 const app = express();
-app.use(cors());
+
+// ALLOW FRONTEND TO ACCESS AUDIO/IMAGES
+app.use(cors({
+    origin: '*', // Allow all origins (Simplest for deployment)
+    methods: ['GET', 'POST', 'DELETE', 'PUT'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
+
+
 
 // --- CONFIG ---
 const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/musicplayer";
