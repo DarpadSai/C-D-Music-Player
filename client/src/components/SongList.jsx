@@ -20,6 +20,9 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
+  // HELPER: Get Token from EITHER storage
+  const getToken = () => localStorage.getItem('token') || sessionStorage.getItem('token');
+
   // Initial Fetch
   useEffect(() => { fetchSongs(); fetchUserPlaylists(); }, [view, playlistId]);
   
@@ -28,37 +31,37 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
 
   const fetchPublicPlaylists = async () => {
       try {
-          const res = await api.get('/playlists/public', { headers: { 'Authorization': localStorage.getItem('token') } });
+          const res = await api.get('/playlists/public', { headers: { 'Authorization': getToken() } });
           setPublicPlaylists(res.data || []);
       } catch (err) { console.error(err); }
   }
 
   const fetchSongs = async () => {
-    const token = localStorage.getItem('token');
     setPlaylistName(''); 
     try {
         let res;
+        const headers = { 'Authorization': getToken() };
+
         if (view === 'liked') {
-            res = await api.get('/songs', { headers: { 'Authorization': token } });
+            res = await api.get('/songs', { headers });
             setSongs(res.data.filter(s => s.isLiked));
         } else if (view === 'playlist' && playlistId) {
-            res = await api.get(`/playlists/${playlistId}`, { headers: { 'Authorization': token } });
+            res = await api.get(`/playlists/${playlistId}`, { headers });
             setSongs(res.data.songs || []);
             setPlaylistName(res.data.name);
         } else {
-            res = await api.get('/songs', { headers: { 'Authorization': token } });
+            res = await api.get('/songs', { headers });
             setSongs(res.data || []);
         }
     } catch (err) { 
         console.error(err);
-        // DEBUG NOTIFICATION: This will tell you if the connection failed
-        toast.error("Failed to load songs. Check Console for details.");
+        // toast.error("Failed to load songs.");
     }
   };
 
   const fetchUserPlaylists = async () => {
       try {
-        const res = await api.get('/playlists/user', { headers: { 'Authorization': localStorage.getItem('token') } });
+        const res = await api.get('/playlists/user', { headers: { 'Authorization': getToken() } });
         setUserPlaylists(res.data || []);
       } catch(e) {}
   };
@@ -75,7 +78,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
     const toastId = toast.loading("Uploading & Analyzing...");
 
     try {
-      await api.post('/upload', formData, { headers: { 'Authorization': localStorage.getItem('token') } });
+      await api.post('/upload', formData, { headers: { 'Authorization': getToken() } });
       toast.success("Song Added!", { id: toastId });
       setShowUpload(false);
       setFile(null);
@@ -96,7 +99,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
   const saveEdit = async (e) => {
       e.preventDefault();
       try {
-          await api.put(`/songs/${editMode}`, editData, { headers: { 'Authorization': localStorage.getItem('token') } });
+          await api.put(`/songs/${editMode}`, editData, { headers: { 'Authorization': getToken() } });
           toast.success("Updated");
           setEditMode(null);
           fetchSongs();
@@ -107,7 +110,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
       e.stopPropagation();
       if(!window.confirm("Delete this song?")) return;
       try {
-          await api.delete(`/songs/${id}`, { headers: { 'Authorization': localStorage.getItem('token') } });
+          await api.delete(`/songs/${id}`, { headers: { 'Authorization': getToken() } });
           toast.success("Deleted");
           fetchSongs();
       } catch(e) { toast.error("Failed"); }
@@ -117,7 +120,7 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
       e.stopPropagation();
       if(!window.confirm("Delete playlist?")) return;
       try {
-          await api.delete(`/playlists/${id}`, { headers: { 'Authorization': localStorage.getItem('token') } });
+          await api.delete(`/playlists/${id}`, { headers: { 'Authorization': getToken() } });
           fetchPublicPlaylists(); 
       } catch (e) { toast.error("Failed"); }
   };
@@ -125,12 +128,12 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
   const toggleLike = async (e, id) => {
     e.stopPropagation();
     setSongs(c => c.map(s => s._id === id ? { ...s, isLiked: !s.isLiked } : s));
-    try { await api.post(`/songs/like/${id}`, {}, { headers: { 'Authorization': localStorage.getItem('token') } }); } catch(e) {}
+    try { await api.post(`/songs/like/${id}`, {}, { headers: { 'Authorization': getToken() } }); } catch(e) {}
   };
 
   const addToPlaylist = async (pid, sid) => {
       try {
-          await api.post(`/playlists/${pid}/add`, { songId: sid }, { headers: { 'Authorization': localStorage.getItem('token') } });
+          await api.post(`/playlists/${pid}/add`, { songId: sid }, { headers: { 'Authorization': getToken() } });
           toast.success("Added");
           setShowAddToPlaylist(null);
       } catch(e) { toast.error("Failed"); }
@@ -187,8 +190,8 @@ const SongList = ({ onPlay, role, view, searchQuery, playlistId, onPlaylistClick
               <div className="modal-content">
                   <h3>Edit Song Details</h3>
                   <form onSubmit={saveEdit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                      <input value={editData.title} onChange={e => setEditData({...editData, title: e.target.value})} placeholder="Title" />
-                      <input value={editData.artist} onChange={e => setEditData({...editData, artist: e.target.value})} placeholder="Artist" />
+                      <input value={editData.title} onChange={e => setEditData({...editData, title: e.target.value})} placeholder="Title" style={{padding: '10px', borderRadius: '8px', border: '1px solid #475569', background: 'rgba(0,0,0,0.2)', color: 'white'}} />
+                      <input value={editData.artist} onChange={e => setEditData({...editData, artist: e.target.value})} placeholder="Artist" style={{padding: '10px', borderRadius: '8px', border: '1px solid #475569', background: 'rgba(0,0,0,0.2)', color: 'white'}} />
                       <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                           <button type="button" onClick={() => setEditMode(null)} style={{ flex: 1, background: 'transparent', border: '1px solid #475569', color: '#fff', padding: '10px', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
                           <button type="submit" style={{ flex: 1, background: '#818cf8', border: 'none', color: 'white', padding: '10px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Save</button>
