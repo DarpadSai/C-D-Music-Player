@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Toaster } from 'react-hot-toast'; // Import Toaster
+import { Toaster } from 'react-hot-toast';
 import SongList from './components/SongList';
 import Player from './components/Player';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
-import UserList from './components/UserList'; // New Component
+import UserList from './components/UserList';
 
 function App() {
   const [currentSong, setCurrentSong] = useState(null);
@@ -28,7 +28,7 @@ function App() {
   const handleLogin = (newRole, newName) => {
       setRole(newRole);
       setUsername(newName);
-      setView('home'); // Requirement: Force Home on Login
+      setView('home');
   };
 
   const handleLogout = () => {
@@ -64,6 +64,7 @@ function App() {
 
   if (!role) return (
     <>
+        {/* FIX: Position set to top-center for Login Screen */}
         <Toaster position="top-center" toastOptions={{ style: { background: '#333', color: '#fff' } }} />
         <Login onLogin={handleLogin} />
     </>
@@ -71,9 +72,9 @@ function App() {
 
   return (
     <div className="app-layout">
-      <Toaster position="bottom-right" toastOptions={{ style: { background: '#333', color: '#fff' } }} />
+      {/* FIX: Position set to top-center for Main App */}
+      <Toaster position="top-center" toastOptions={{ style: { background: '#333', color: '#fff' } }} />
       
-      {/* Responsive Sidebar Container */}
       <div className="sidebar-container">
           <Sidebar 
             role={role} 
@@ -86,7 +87,6 @@ function App() {
       </div>
       
       <div className="main-view">
-        {/* Header */}
         <div style={{ padding: '15px 30px', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backdropFilter: 'blur(10px)' }}>
              <div style={{ color: '#aaa', fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
                 {view}
@@ -99,7 +99,6 @@ function App() {
              </div>
         </div>
 
-        {/* Content */}
         <div style={{ flex: 1, overflowY: 'auto', background: 'linear-gradient(180deg, #1e1e1e 0%, #121212 40%)' }}>
            {view === 'users' && role === 'admin' ? (
                <UserList />
